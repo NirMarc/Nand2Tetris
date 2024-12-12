@@ -3,6 +3,7 @@ from Command_Type import *
 class CodeWriter:
     def __init__(self, filename):
         self.writer = open(filename, "w")
+        self.label_count = 0
 
     def write_arithmetic(self, command):
         match command:
@@ -20,7 +21,7 @@ class CodeWriter:
                                   "M=M-D\n")
             case "neg":
                 self.writer.write("@SP\n"
-                                  "AM=M-1\n"
+                                  "A=M-1\n"
                                   "M=-M\n")
             case "and":
                 self.writer.write("@SP\n"
@@ -39,42 +40,14 @@ class CodeWriter:
                                   "A=M-1\n"
                                   "M=!M\n")
             case _:
-                self.writer.write("@SP\n"
-                                  "M=M-1\n"
-                                  "A=M\n"
-                                  "D=M\n"
-                                  "A=A-1\n"
-                                  "M=M-D\n"
-                                  "D=M\n"
-                                  "@LOOP\n")
-                match command:
-                    case "eq":
-                        self.writer.write("D;JEQ\n")
-                    case "gt":
-                        self.writer.write("D;JGT\n")
-                    case "lt":
-                        self.writer.write("D;JLT\n")
-
-                self.writer.write("@SP\n"
-                                  "M=M-1\n"
-                                  "A=M\n"
-                                  "M=-1\n"
-                                  "@END\n"
-                                  "0;JMP\n"
-                                  "(LOOP)\n"
-                                  "@SP\n"
-                                  "M=M-1\n"
-                                  "A=M\n"
-                                  "M=0\n"
-                                  "(END)\n"
-                                  "@SP\n"
-                                  "M=M+1\n")
                 # self.writer.write("@SP\n"
-                #                   "AM=M-1\n"
+                #                   "M=M-1\n"
+                #                   "A=M\n"
                 #                   "D=M\n"
                 #                   "A=A-1\n"
-                #                   "D=M-D\n"
-                #                   "@LOOP\n")
+                #                   "M=M-D\n"
+                #                   "D=M\n"
+                #                   f"@LOOP{self.label_count}\n")
                 # match command:
                 #     case "eq":
                 #         self.writer.write("D;JEQ\n")
@@ -82,16 +55,45 @@ class CodeWriter:
                 #         self.writer.write("D;JGT\n")
                 #     case "lt":
                 #         self.writer.write("D;JLT\n")
+                #
                 # self.writer.write("@SP\n"
-                #                   "A=M-1\n"
-                #                   "M=0\n"
-                #                   "@END\n"
-                #                   "0;JMP\n"
-                #                   "(LOOP)\n"
-                #                   "@SP\n"
-                #                   "A=M-1\n"
+                #                   "M=M-1\n"
+                #                   "A=M\n"
                 #                   "M=-1\n"
-                #                   "(END)\n")
+                #                   f"@END{self.label_count}\n"
+                #                   "0;JMP\n"
+                #                   f"(LOOP{self.label_count})\n"
+                #                   "@SP\n"
+                #                   "M=M-1\n"
+                #                   "A=M\n"
+                #                   "M=0\n"
+                #                   f"(END{self.label_count})\n"
+                #                   "@SP\n"
+                #                   "M=M+1\n")
+                self.label_count += 1
+                self.writer.write("@SP\n"
+                                  "AM=M-1\n"
+                                  "D=M\n"
+                                  "A=A-1\n"
+                                  "D=M-D\n"
+                                  f"@LOOP{self.label_count}\n")
+                match command:
+                    case "eq":
+                        self.writer.write("D;JEQ\n")
+                    case "gt":
+                        self.writer.write("D;JGT\n")
+                    case "lt":
+                        self.writer.write("D;JLT\n")
+                self.writer.write("@SP\n"
+                                  "A=M-1\n"
+                                  "M=0\n"
+                                  f"@END{self.label_count}\n"
+                                  "0;JMP\n"
+                                  f"(LOOP{self.label_count})\n"
+                                  "@SP\n"
+                                  "A=M-1\n"
+                                  "M=-1\n"
+                                  f"(END{self.label_count})\n")
 
     def write_push_pop(self, command, segment, index):
         if command == CommandType.C_PUSH:

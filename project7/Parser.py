@@ -1,5 +1,5 @@
 from unittest import case
-import yaml
+
 from Command_Type import CommandType
 
 class Parser:
