@@ -202,5 +202,9 @@ class CodeWriter:
                                   "A=M\n"
                                   "M=D\n")
 
+
+    def write_command(self, command):
+        self.writer.write("//" + command + "\n")
+
     def close(self):
         self.writer.close()
